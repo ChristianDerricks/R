@@ -176,9 +176,9 @@ mtext(paste("Rule 8:", sum(rule8)), side=1, line=6, at=60 + mtextoffset, adj = 1
 par(mar=c(7,0,2,2))
 par(fig=c(0.8,1,0,1), new = TRUE)
 
-hist_with_yaxis_label = FALSE
+hist_seperated = TRUE
 
-if (hist_with_yaxis_label == TRUE) {
+if (hist_seperated == TRUE) {
         barplot(h$counts, space = 0, horiz=TRUE, axes = FALSE, xlim = c(0,ceiling(max(h$counts)/10)*10))
         axis(side = 1)
         axis(side = 2, at = seq_len(length(h$counts) + 1) - 1, labels = FALSE)
@@ -186,9 +186,13 @@ if (hist_with_yaxis_label == TRUE) {
 } else
 {
         par(fig=c(0.7,1,0,1))
-        barplot(h$counts, space = 0, horiz=TRUE, axes = FALSE, xlim = c(0,ceiling(max(h$counts)/10)*10))
+        barplot(h$counts, space = 0, horiz=TRUE, axes = FALSE, xlim = c(0, ceiling(max(h$counts)/10)*10))
         axis(side = 1)
+        axis(side = 4, at = seq_len(length(h$counts) + 1) - 1, labels = FALSE)
+        axis(side = 4, at = seq_along(h$counts) - 0.5, tick = FALSE, labels = h$mids, las = 2)
         box()
 }
+mtext('result', side = 4, line = 2)
+mtext('counts', side = 1, line = 2)
 
 #dev.off()
