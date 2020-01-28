@@ -31,7 +31,7 @@ tizeTEX_path_and_filename = paste(tikz_path, tikz_filename)
 # c(bottom, left, top, right) to set margins
 par(mar=c(7,6,2,6)) 
 
-data <- read.csv('/home/christian/Dokumente/Programme/R/ParetoDiagramm/data/pareto_data.csv', header = TRUE)
+data <- read.csv('/R/ParetoDiagramm/data/pareto_data.csv', header = TRUE)
 yprop = data$defect[order(decreasing = TRUE, data$defect)]
 csumvec = 100*cumsum(yprop)/sum(yprop)
 
