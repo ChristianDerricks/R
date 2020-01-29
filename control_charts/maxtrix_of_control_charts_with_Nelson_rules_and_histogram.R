@@ -13,8 +13,8 @@ graphics.off()
 # delete every variable
 remove(list = ls())
 
-library(tikzDevice)
 library(Rspc)
+library(tikzDevice)
 
 # This is a list of eight colors that are distinguishable for people with 
 # every type of color vision deficiency (often misleadingly called colorblindness).
@@ -28,14 +28,13 @@ cb_skyblue       = rgb( 86, 180, 233, max=255)
 cb_reddishpurple = rgb(204, 121, 167, max=255)
 cb_yellow        = rgb(240, 228,  66, max=255)
 
-
-# manually paste the following two lines in the header of the tex file for full utf8 support
+# manually paste the following two lines in the header of the tex file
 # %!TEX TS-program = lualatex
 # %!TeX encoding = utf8
 tikz_path = '/R/Prozessregelkarten/tikz/'
-#dir.create(file.path(tikz_path), showWarnings = FALSE)
+dir.create(file.path(tikz_path), showWarnings = FALSE)
 
-tikz_filename = 'control_chart_8_Nelson_rules.tex'
+tikz_filename = 'control_chart_with_histogram.tex'
 tizeTEX_path_and_filename = paste(tikz_path, tikz_filename)
 #tikz(tizeTEX_path_and_filename, standAlone = TRUE, sanitize = TRUE)
 
@@ -79,73 +78,159 @@ y[70] = 10; y[71] = 10;
 y[72] = 10; y[73] = 6; y[74] = 16; y[75] = 16; y[76] = 4; 
 y[77] = 5; y[78] = 16; y[79] = 6; y[80] = 16;
 
-par(mfrow=c(3,3))
-par(mar=c(2,2,2,2))
+h = hist(y, plot = FALSE)
+
+ylimmax = max(h$mids)+2
+ylimmin = min(h$mids)-2
+
+par(fig=c(0,0.7,0,1), new=FALSE)
+par(mar=c(7,3,2,0))
+
+plot(x, y, 
+     panel.first = c (abline(mean(y),0,         col = cb_darkgrey,  lty = 1),
+                      abline(mean(y)+1*sd(y),0, col = 'gray50', lty = 3),
+                      abline(mean(y)-1*sd(y),0, col = 'gray50', lty = 3),
+                      abline(mean(y)+2*sd(y),0, col = 'gray50', lty = 3),
+                      abline(mean(y)-2*sd(y),0, col = 'gray50', lty = 3),
+                      abline(mean(y)+3*sd(y),0, col = 'gray50', lty = 3),
+                      abline(mean(y)-3*sd(y),0, col = 'gray50', lty = 3),
+                      
+                      abline(14,0, col = cb_blue, lty = 2),
+                      abline(6, 0, col = cb_blue, lty = 2)
+                      #abline(mean(y)+2.5*sd(y),0, col = 'green', lty = 5),
+                      #abline(mean(y)-2.5*sd(y),0, col = 'green', lty = 5)
+                      ),
+     xlab = "", yaxs="i", ylim = c(ylimmin,ylimmax),
+     ylab = "", 
+     type = 'b', 
+     pch  = 20, 
+     cex  = 0.5)
+
+mtext('sample', side=1, line=2)
+mtext('property', side=2, line=2)
+mtext('control chart with special markings', side=3, line = 0.5)
+
+legend("bottom", title = 'Type of Nelson Rule Violations',
+       legend=c("Rule 1", "Rule 5", "Rule 2", "Rule 6", 
+                "Rule 3", "Rule 7", "Rule 4", "Rule 8"),
+       pch = c(0,6,1,0,2,1,5,2),
+       col = c(cb_vermillion,
+             cb_skyblue,
+             cb_blue,
+             cb_reddishpurple,
+             cb_bluishgreen,
+             cb_orange,
+             cb_yellow,
+             cb_blue
+             ),
+       ncol = 4,
+       bg = 'gray98',
+       cex = 0.6)
+
 qcclimits = CalculateLimits(y, type = 'i')
 zoneborders = CalculateZoneBorders(qcclimits, controlLimitDistance = 3)
 
-sigmalines <- function (y, N) {
-        return (c(abline(mean(y),0,         col = 'black',  lty = 2),
-                  abline(mean(y)+1*sd(y),0, col = 'gray50', lty = 3),
-                  abline(mean(y)-1*sd(y),0, col = 'gray50', lty = 3),
-                  abline(mean(y)+2*sd(y),0, col = 'gray50', lty = 3),
-                  abline(mean(y)-2*sd(y),0, col = 'gray50', lty = 3),
-                  abline(mean(y)+3*sd(y),0, col = 'gray50', lty = 3),
-                  abline(mean(y)-3*sd(y),0, col = 'gray50', lty = 3))
-        )
-}
-
 # Rule 1
-plot(x, y, panel.first = sigmalines(y, N),
-     pch = 20, cex = 0.6, main = '1+ beyond 3xsd') 
 rule1 = Rule1(y, lcl = qcclimits$lcl, ucl = qcclimits$ucl, sides = 1)
 points(x[c(rule1) > 0], y[c(rule1) > 0], pch = 0, cex = 1.2, col = cb_vermillion)
 
 # Rule 2
-plot(x, y, panel.first = sigmalines(y, N),
-     pch = 20, cex = 0.6, main = '9+ on one side of the mean')
 rule2 = Rule2(y, cl = qcclimits$cl, npoints = 9)
 points(x[c(rule2) > 0], y[c(rule2) > 0], pch = 1, cex = 1.2, col = cb_blue)
 
 # Rule 3
-plot(x, y, panel.first = sigmalines(y, N),
-     pch = 20, cex = 0.6, main = '6+ increasing or decreasing')
 rule3 = Rule3(y, nPoints = 6, convention = 1, equalBreaksSeries = 1)
 points(x[c(rule3) > 0], y[c(rule3) > 0], pch = 2, cex = 1.2, col = cb_bluishgreen)
 
 # Rule 4
-plot(x, y, panel.first = sigmalines(y, N),
-     pch = 20, cex = 0.6, main = '14+ alternating in direction')
 rule4 = Rule4(y, nPoints = 14, convention = 1)
 points(x[c(rule4) > 0], y[c(rule4) > 0], pch = 5, cex = 1.2, col = cb_yellow)
 
-par(mar=c(4,4,4,4))
-hist(y, main = 'Histogram', ylab = 'Frequency', xlab = 'value')
-box()
-par(mar=c(2,2,2,2))
-
 # Rule 5
-plot(x, y, panel.first = sigmalines(y, N),
-     pch = 20, cex = 0.6, main = '2/3 beyond 2xsd')
 rule5 = Rule5(y, zoneB = zoneborders, minNPoints = 2, nPoints = 3)
 points(x[c(rule5) > 0], y[c(rule5) > 0], pch = 6, cex = 1.2, col = cb_skyblue)
 
 # Rule 6
-plot(x, y, panel.first = sigmalines(y, N),
-     pch = 20, cex = 0.6, main = '4/5 (one side) more than 1xsd')
 rule6 = Rule6(y, zoneB = zoneborders, minNPoints = 4, nPoints = 5)
 points(x[c(rule6) > 0], y[c(rule6) > 0], pch = 0, cex = 1.2, col = cb_reddishpurple)
 
 # Rule 7
-plot(x, y, panel.first = sigmalines(y, N),
-     pch = 20, cex = 0.6, main = '15+ within ±1xsd')
 rule7 = Rule7(y, zoneB = zoneborders, nPoints = 15)
 points(x[c(rule7) > 0], y[c(rule7) > 0], pch = 1, cex = 1.2, col = cb_orange)
 
 # Rule 8
-plot(x, y, panel.first = sigmalines(y, N),
-     pch = 20, cex = 0.6, main = '8+ outisde ±1xsd')
 rule8 = Rule8(y, zoneB = zoneborders, nPoints = 8)
-points(x[c(rule8) > 0], y[c(rule8) > 0], pch = 2, cex = 1.2, col = 'blue')
+points(x[c(rule8) > 0], y[c(rule8) > 0], pch = 2, cex = 1.2, col = cb_blue)
+
+mtext('Number of Violations per Rule', side=1, line=4)
+
+mtextoffset = 17.5
+mtext(paste("Rule 1:", sum(rule1)), side=1, line=5, at= 0 + mtextoffset, adj = 1)
+mtext(paste("Rule 2:", sum(rule2)), side=1, line=6, at= 0 + mtextoffset, adj = 1)
+mtext(paste("Rule 3:", sum(rule3)), side=1, line=5, at=20 + mtextoffset, adj = 1)
+mtext(paste("Rule 4:", sum(rule4)), side=1, line=6, at=20 + mtextoffset, adj = 1)
+
+mtext(paste("Rule 5:", sum(rule5)), side=1, line=5, at=40 + mtextoffset, adj = 1)
+mtext(paste("Rule 6:", sum(rule6)), side=1, line=6, at=40 + mtextoffset, adj = 1)
+mtext(paste("Rule 7:", sum(rule7)), side=1, line=5, at=60 + mtextoffset, adj = 1)
+mtext(paste("Rule 8:", sum(rule8)), side=1, line=6, at=60 + mtextoffset, adj = 1)
+
+sumofruleviolations = sum(rule1) + sum(rule2) + sum(rule3) + sum(rule4) + sum(rule5) + sum(rule6) + sum(rule7) + sum(rule8) 
+numberofrulesviolated = 0
+if (sum(rule1) > 0) {numberofrulesviolated = numberofrulesviolated + 1}
+if (sum(rule2) > 0) {numberofrulesviolated = numberofrulesviolated + 1}
+if (sum(rule3) > 0) {numberofrulesviolated = numberofrulesviolated + 1}
+if (sum(rule4) > 0) {numberofrulesviolated = numberofrulesviolated + 1}
+if (sum(rule5) > 0) {numberofrulesviolated = numberofrulesviolated + 1}
+if (sum(rule6) > 0) {numberofrulesviolated = numberofrulesviolated + 1}
+if (sum(rule7) > 0) {numberofrulesviolated = numberofrulesviolated + 1}
+if (sum(rule8) > 0) {numberofrulesviolated = numberofrulesviolated + 1}
+
+mtext(paste("rule violations:"),    side=1, line=5, at=90 + mtextoffset, adj = 1)
+mtext(paste("vioalted rules:"),     side=1, line=6, at=90 + mtextoffset, adj = 1)
+mtext(paste(sumofruleviolations),   side=1, line=5, at=98 + mtextoffset, adj = 1)
+mtext(paste(numberofrulesviolated), side=1, line=6, at=98 + mtextoffset, adj = 1)
+
+# Histogram part
+par(mar=c(7,0,2,4))
+par(fig=c(0.7,1,0,1), new = TRUE)
+
+xfit <- seq(min(y), max(y), length.out = N)
+yfit <- dnorm(xfit, mean = mean(y), sd = sd(y))
+yfit <- yfit * diff(h$mids[1:2]) * length(y)
+
+plot(yfit, xfit, type = 'l', lwd = 0.01, axes = FALSE, 
+     xaxs="i", xlab="", xlim = c(0,ceiling(1.2*max(h$counts)/10)*10),
+     yaxs="i", ylab="", ylim = c(ylimmin,ylimmax),
+     panel.first = c (abline(mean(y),0,         col = cb_darkgrey,  lty = 1),
+                      abline(mean(y)+1*sd(y),0, col = 'gray50', lty = 3),
+                      abline(mean(y)-1*sd(y),0, col = 'gray50', lty = 3),
+                      abline(mean(y)+2*sd(y),0, col = 'gray50', lty = 3),
+                      abline(mean(y)-2*sd(y),0, col = 'gray50', lty = 3),
+                      abline(mean(y)+3*sd(y),0, col = 'gray50', lty = 3),
+                      abline(mean(y)-3*sd(y),0, col = 'gray50', lty = 3),
+                      
+                      abline(14,0, col = cb_blue, lty = 2),
+                      abline(6, 0, col = cb_blue, lty = 2))
+     )
+axis(1)
+axis(4)
+
+mtext('property', side = 4, line = 2)
+mtext('counts', side = 1, line = 2)
+
+rect(xleft   = 0, 
+     ybottom = h$mids-diff(h$mids[1:2])/2, 
+     xright  = h$counts, 
+     ytop    = h$mids+diff(h$mids[1:2])/2,
+     col     = "gray"
+)
+
+xfit <- seq(min(y), max(y), length.out = N)
+yfit <- dnorm(xfit, mean = mean(y), sd = sd(y))
+yfit <- yfit * diff(h$mids[1:2]) * length(y)
+
+lines(yfit, xfit)
+box()
 
 #dev.off()
