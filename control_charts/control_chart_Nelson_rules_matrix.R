@@ -7,37 +7,12 @@
 # no. 4 (October 1984), pp. 238-239
 # https://doi.org/10.1080/00224065.1984.11978921
 
-if(!is.null(dev.list())) dev.off()
-graphics.off()
-
-# delete every variable
-remove(list = ls())
-
-library(tikzDevice)
 library(Rspc)
 
-# This is a list of eight colors that are distinguishable for people with 
-# every type of color vision deficiency (often misleadingly called colorblindness).
-# see https://jfly.iam.u-tokyo.ac.jp/color/ for more information.
-cb_darkgrey      = rgb( 50,  50,  50, max=255)
-cb_blue          = rgb(  0, 114, 178, max=255)
-cb_orange        = rgb(230, 159,   0, max=255)
-cb_bluishgreen   = rgb(  0, 158, 115, max=255)
-cb_vermillion    = rgb(213,  94,   0, max=255)
-cb_skyblue       = rgb( 86, 180, 233, max=255)
-cb_reddishpurple = rgb(204, 121, 167, max=255)
-cb_yellow        = rgb(240, 228,  66, max=255)
+source('pkg/initalize.R', local = TRUE)
 
-
-# manually paste the following two lines in the header of the tex file for full utf8 support
-# %!TEX TS-program = lualatex
-# %!TeX encoding = utf8
-tikz_path = '/home/christian/Dokumente/Programme/R/Prozessregelkarten/tikz/'
-dir.create(file.path(tikz_path), showWarnings = FALSE)
-
-tikz_filename = 'control_chart_8_Nelson_rules.tex'
-tizeTEX_path_and_filename = paste(tikz_path, tikz_filename)
-tikz(tizeTEX_path_and_filename, standAlone = TRUE, sanitize = TRUE)
+make_tikz = TRUE
+if (make_tikz) tikzRexport('control_chart_matrix.tex')
 
 N = 80
 x <- seq(1,N,1)
@@ -148,4 +123,4 @@ plot(x, y, panel.first = sigmalines(y, N),
 rule8 = Rule8(y, zoneB = zoneborders, nPoints = 8)
 points(x[c(rule8) > 0], y[c(rule8) > 0], pch = 2, cex = 1.2, col = 'blue')
 
-dev.off()
+if (make_tikz) dev.off()
