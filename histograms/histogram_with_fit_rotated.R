@@ -1,19 +1,7 @@
-if(!is.null(dev.list())) dev.off()
-graphics.off()
+source('pkg/initalize.R', local = TRUE)
 
-# delete every variable
-remove(list = ls())
-
-#library(tikzDevice)
-# manually paste the following two lines in the header of the tex file
-# %!TEX TS-program = lualatex
-# %!TeX encoding = utf8
-#tikz_path = '/home/christian/Dokumente/Programme/R/Histogramme/tikz/'
-#dir.create(file.path(tikz_path), showWarnings = FALSE)
-
-#tikz_filename = 'histogram_with_fit_rotated.tex'
-#tizeTEX_path_and_filename = paste(tikz_path, tikz_filename)
-#tikz(tizeTEX_path_and_filename, standAlone = TRUE, sanitize = TRUE)
+make_tikz = TRUE
+if (make_tikz) tikzRexport('histogram_with_fit_rotated.tex')
 
 N = 1000
 x <- seq(1,N,1)
@@ -39,4 +27,4 @@ yfit <- yfit * diff(h$mids[1:2]) * length(y)
 
 lines(yfit, xfit)
 
-#dev.off()
+if (make_tikz) dev.off()
