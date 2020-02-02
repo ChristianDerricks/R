@@ -6,7 +6,7 @@ if (make_tikz) tikzRexport('ParetoDiagram.tex')
 # c(bottom, left, top, right) to set margins
 par(mar=c(7,6,2,6))
 
-data <- read.csv('/R/ParetoDiagramm/data/pareto_data.csv', header = TRUE)
+data <- read.csv('pareto_data.csv', header = TRUE)
 yprop = data$defect[order(decreasing = TRUE, data$defect)]
 csumvec = 100*cumsum(yprop)/sum(yprop)
 
