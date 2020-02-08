@@ -1,6 +1,7 @@
 source('pkg/initalize.R', local = TRUE)
+source('pkg/custom_histogram.R', local = TRUE)
 
-make_tikz = TRUE
+make_tikz = FALSE
 if (make_tikz) tikzRexport('histogram_with_fit_rotated.tex')
 
 N = 1000
@@ -9,22 +10,13 @@ x <- seq(1,N,1)
 set.seed(5)
 y <- rnorm(N, mean=10, sd=1) 
 
-h <- hist(y, plot = FALSE)
+par(mar=c(3,1,1,3))
+custom_histogram(y, 25, 5, 15, TRUE, TRUE)
 
-plot(NULL, ylim=c(5,15), xlim=c(0,ceiling(1.2*max(h$counts)/10)*10), bty="o",
-     xaxt="n", xaxs="i", yaxt="n", yaxs="i", xlab="", ylab="")
+axis(1)
+mtext('x-values', side = 1, line = 2)
 
-rect(xleft   = 0, 
-     ybottom = h$mids-diff(h$mids[1:2])/2, 
-     xright  = h$counts, 
-     ytop    = h$mids+diff(h$mids[1:2])/2,
-     col     = "gray"
-     )
-
-xfit <- seq(min(y), max(y), length.out = N)
-yfit <- dnorm(xfit, mean = mean(y), sd = sd(y))
-yfit <- yfit * diff(h$mids[1:2]) * length(y)
-
-lines(yfit, xfit)
+axis(4)
+mtext('y-values', side = 4, line = 2)
 
 if (make_tikz) dev.off()
