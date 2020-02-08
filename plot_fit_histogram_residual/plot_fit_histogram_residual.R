@@ -1,8 +1,8 @@
 source('pkg/initalize.R', local = TRUE)
-source('pkg/make_histogram.R', local = TRUE)
+source('pkg/custom_histogram.R', local = TRUE)
 
 make_tikz = FALSE
-if (make_tikz) tikzRexport('control_chart_with_histogram.tex')
+if (make_tikz) tikzRexport('plot_fit_histogram_residual.tex')
 
 # number N of random numbers
 N = 100
@@ -25,7 +25,7 @@ ylimmax = 1300
 # upper left
 par(fig=c(0,0.68,0.52,1))
 par(mar=c(0,4,2,0))
-plot(x,y, #ylim = c(ylimmin,ylimmax),
+plot(x,y, panel.first = grid(), #ylim = c(ylimmin,ylimmax),
      bty="o", xaxt="n", xlab="", ylab="")
 lines(x, intercept + x*slope, lwd = 2, col = cb_vermillion)
 mtext('y-values', side = 2, line = 3)
@@ -33,7 +33,7 @@ mtext('y-values', side = 2, line = 3)
 # upper right
 par(fig=c(0.72,1,0.52,1), new=TRUE)
 par(mar=c(0,0,2,3))
-make_histogram(y-slope*x, 100, 500) # using the slope to normalize the data
+custom_histogram(y-slope*x, 5, 100, 500, TRUE, TRUE) # using the slope to normalize the data
 axis(3)
 axis(4)
 mtext('counts',    side = 3, line = 2)
@@ -46,14 +46,14 @@ ylimmax =  200
 # lower left
 par(fig=c(0,0.68,0,0.48), new=TRUE)
 par(mar=c(4,4,0,0))
-plot(m1$residuals, ylim = c(ylimmin,ylimmax), xlab = '', ylab = '')
+plot(m1$residuals, panel.first = grid(), ylim = c(ylimmin,ylimmax), xlab = '', ylab = '')
 mtext('x-values',   side = 1, line = 2)
 mtext('residuals',  side = 2, line = 3)
 
 # lower right
 par(fig=c(0.72,1,0,0.48), new = TRUE)
 par(mar=c(4,0,0,3))
-make_histogram(m1$residuals, ylimmin, ylimmax)
+custom_histogram(m1$residuals, 5, ylimmin, ylimmax, TRUE, TRUE)
 axis(1)
 axis(4)
 mtext('counts',    side = 1, line = 2)
