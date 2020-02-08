@@ -1,9 +1,8 @@
 source('pkg/initalize.R', local = TRUE)
+source('pkg/custom_histogram.R', local = TRUE)
 
-make_tikz = TRUE
+make_tikz = FALSE
 if (make_tikz) tikzRexport('histogram_with_fit.tex')
-
-
 
 N = 1000
 x <- seq(1,N,1)
@@ -11,22 +10,13 @@ x <- seq(1,N,1)
 set.seed(5)
 y <- rnorm(N, mean=10, sd=1)
 
-h <- hist(y, plot = FALSE)
+par(mar=c(3,3,1,1))
+custom_histogram(y, 25, 5, 15, TRUE, FALSE)
 
-plot(NULL, xlim=c(5,15), ylim=c(0,ceiling(1.2*max(h$counts)/10)*10), bty="o",
-     xaxs="i", yaxs="i", xlab="x-value", ylab="y-value", main = "histogram with fit")
+axis(1)
+mtext('x-values', side = 1, line = 2)
 
-rect(xleft   = h$mids-diff(h$mids[1:2])/2, 
-     ybottom = 0, 
-     xright  = h$mids+diff(h$mids[1:2])/2, 
-     ytop    = h$counts,
-     col     = "gray"
-     )
-
-xfit <- seq(min(y), max(y), length.out = N)
-yfit <- dnorm(xfit, mean = mean(y), sd = sd(y))
-yfit <- yfit * diff(h$mids[1:2]) * length(y)
-
-lines(xfit, yfit)
+axis(2)
+mtext('y-values', side = 2, line = 2)
 
 if (make_tikz) dev.off()
