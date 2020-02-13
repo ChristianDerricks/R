@@ -1,4 +1,4 @@
 is.RStudio <- function(){
-  if (!rstudioapi::isAvailable()) return(FALSE)
-  return(TRUE)
+  if (rstudioapi::isAvailable() & identical(.Platform$GUI, "RStudio")) return(TRUE)
+  return(FALSE)
 }
